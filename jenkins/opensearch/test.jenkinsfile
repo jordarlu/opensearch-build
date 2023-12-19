@@ -67,7 +67,6 @@ pipeline {
                             sh("/Library/Java/JavaVirtualMachines/openjdk11-temurin/Contents/Home/bin/java -version")
                             sh("/Library/Java/JavaVirtualMachines/openjdk17-temurin/Contents/Home/bin/java -version")
                             sh("jenv versions")
-                            sh("jenv doctor")
                             sh("java -version")
                             echo("Uploading darwin min snapshots to S3")
                         }
