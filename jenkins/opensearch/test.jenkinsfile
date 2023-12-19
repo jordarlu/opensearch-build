@@ -58,6 +58,9 @@ pipeline {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on Mac Docker Container")
                             sh("jenv global ${dockerAgent.javaVersion}")
+                            sh("jenv local ${dockerAgent.javaVersion}")
+                            sh("jenv shell ${dockerAgent.javaVersion}")
+                            sh("jenv versions")
                             sh("java -version")
                             echo("Uploading darwin min snapshots to S3")
                         }
