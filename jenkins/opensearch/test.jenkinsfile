@@ -57,6 +57,7 @@ pipeline {
                     steps {
                         script {
                             sh('eval "$(jenv init -)"')
+                            sh('sleep 5')
                             sh('jenv enable-plugin export')
                             sh("exec $SHELL -l")
                             echo("Switching to Java ${env.javaVersionNumber} on Mac Docker Container")
