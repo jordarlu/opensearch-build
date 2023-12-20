@@ -56,11 +56,12 @@ pipeline {
                     }
                     steps {
                         script {
+                            sh("eval \"$(jenv init -)\" && jenv enable-plugin && exec $SHELL -l")
                             echo("Switching to Java ${env.javaVersionNumber} on Mac Docker Container")
-                            sh("jenv global ${dockerAgent.javaVersion}")
                             sh("jenv local ${dockerAgent.javaVersion}")
                             sh("jenv versions")
                             sh("java -version")
+                            sh("jenv doctor")
                             echo("Uploading darwin min snapshots to S3")
                         }
                     }
