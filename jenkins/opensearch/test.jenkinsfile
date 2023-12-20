@@ -57,15 +57,8 @@ pipeline {
                     steps {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on Mac Docker Container")
-                            sh("exec $SHELL -l")
                             sh("jenv global ${dockerAgent.javaVersion}")
                             sh("jenv local ${dockerAgent.javaVersion}")
-                            sh("exec $SHELL -l")
-                            sh("cat ~/.jenv/version")
-                            sh("ls -l ~/.jenv/versions/")
-                            sh("/Library/Java/JavaVirtualMachines/jdk-21-eclipse-temurin.jdk/Contents/Home/bin/java -version")
-                            sh("/Library/Java/JavaVirtualMachines/openjdk11-temurin/Contents/Home/bin/java -version")
-                            sh("/Library/Java/JavaVirtualMachines/openjdk17-temurin/Contents/Home/bin/java -version")
                             sh("jenv versions")
                             sh("java -version")
                             echo("Uploading darwin min snapshots to S3")
