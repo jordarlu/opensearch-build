@@ -61,6 +61,7 @@ pipeline {
                             sh("jenv versions")
                             sh("pwd")
                             sh("id")
+                            sh("env")
                             sh("hostname")
                             sh("cat /Users/ec2-user/kk")
                             sh("java -version")
