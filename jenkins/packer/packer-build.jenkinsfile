@@ -47,7 +47,7 @@ pipeline {
         stage('packer-build') {
             environment {
                 PACKER_BUILD_GIT_REPOSITORY_REFERENCE = "main"
-                PACKER_BUILD_GIT_REPOSITORY = "https://github.com/opensearch-project/opensearch-ci"
+                PACKER_BUILD_GIT_REPOSITORY = "https://github.com/jordarlu/opensearch-ci"
             }
             steps {
                 script {
