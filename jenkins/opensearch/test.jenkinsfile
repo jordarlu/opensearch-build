@@ -63,6 +63,8 @@ pipeline {
                             sh("id")
                             sh("env")
                             sh("hostname")
+                            sh ("cat ~/.bash_profile")
+                            sh ("source  ~/.bash_profile")
                             sh("echo $PATH")
                             sh("java -version")
                             sh("jenv doctor")
