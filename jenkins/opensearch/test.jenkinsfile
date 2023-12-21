@@ -57,7 +57,7 @@ pipeline {
                     steps {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on Mac Docker Container")
-                            sh("export PATH=$PATH:/Users/ec2-user/.jenv/shims:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:/Users/ec2-user/Library/Python/3.9/bin:/opt/local/Library/Frameworks/Python.framework/Versions/3.9/bin:/opt/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")
+                            sh("export PATH=/Users/ec2-user/.jenv/shims:$PATH")
                             sh("jenv local ${dockerAgent.javaVersion}")
                             sh("jenv versions")
                             sh("pwd")
