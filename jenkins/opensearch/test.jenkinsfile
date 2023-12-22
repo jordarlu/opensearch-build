@@ -63,6 +63,8 @@ pipeline {
                             sh("echo $PATH")
                             sh("java -version")
                             sh("echo $JAVA_HOME")
+                            sh("echo $JENV_VERSION")
+                            sh("echo $USER")
                             echo("Uploading darwin min snapshots to S3")
                         }
                     }
