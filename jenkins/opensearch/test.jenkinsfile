@@ -59,6 +59,7 @@ pipeline {
                             echo("Switching to Java ${env.javaVersionNumber}.0 on Mac Docker Container")
                             sh("jenv local ${env.javaVersionNumber}.0")
                             sh("jenv global ${env.javaVersionNumber}.0")
+                            sh("env")
                             sh("jenv versions")
                             sh("echo $PATH")
                             sh("java -version")
