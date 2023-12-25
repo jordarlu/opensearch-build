@@ -60,7 +60,6 @@ pipeline {
                             sh("unset JENV_VERSION")
                             sh("jenv local ${env.javaVersionNumber}.0")
                             sh("jenv global ${env.javaVersionNumber}.0")
-                            sh("jenv shell ${env.javaVersionNumber}.0")
                             sh("env")
                             sh("jenv versions")
                             sh("pwd")
