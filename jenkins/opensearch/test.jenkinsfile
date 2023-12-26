@@ -62,7 +62,7 @@ pipeline {
                             sh("jenv global ${env.javaVersionNumber}.0")
                             sh("env")
                             sh("jenv versions")
-                            sh("pwd")
+                            sh("jenv init -")
                             sh("java -version")
                             sh("jenv doctor")
                             sh("echo $JAVA_HOME")
