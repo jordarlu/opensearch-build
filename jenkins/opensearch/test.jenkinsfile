@@ -57,6 +57,7 @@ pipeline {
                     steps {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
+                            sh("java -version")
                             sh("jenv global ${dockerAgent.javaVersion}")
                             sh("java -version")
                             sh("env")
