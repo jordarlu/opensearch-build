@@ -58,6 +58,7 @@ pipeline {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
                             sh """
+                                export PATH=\$HOME/.jenv/bin:\$PATH
                                 eval `jenv init -`
                                 jenv enable-plugin export
                                 jenv versions && jenv doctor
