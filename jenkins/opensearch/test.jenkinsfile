@@ -57,7 +57,7 @@ pipeline {
                     steps {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
-                            sh("eval $(jenv init -)")
+                            sh("eval `jenv init -`")
                             sh("jenv enable-plugin export")
                             sh("jenv versions && jenv doctor")
                             //sh("java -version")
