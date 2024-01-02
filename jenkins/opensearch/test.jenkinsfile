@@ -57,15 +57,17 @@ pipeline {
                     steps {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
-                            sh("java -version")
-                            sh("jenv global ${dockerAgent.javaVersion}")
-                            sh("java -version")
-                            sh("env")
-                            sh("jenv versions")
-                            sh("java -version")
-                            sh("jenv doctor")
-                            sh("echo $JAVA_HOME")
-                            sh("echo $JENV_VERSION")
+                            sh("jenv enable-plugin export")
+                            sh("jenv versions && jenv doctor")
+                            //sh("java -version")
+                            //sh("jenv global ${dockerAgent.javaVersion}")
+                            //sh("java -version")
+                            //sh("env")
+                            //sh("jenv versions")
+                            //sh("java -version")
+                            //sh("jenv doctor")
+                            //sh("echo $JAVA_HOME")
+                            //sh("echo $JENV_VERSION")
                         }
                     }
                     post {
