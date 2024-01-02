@@ -58,11 +58,11 @@ pipeline {
                         script {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
                             sh """
-                                export PATH=\$HOME/.jenv/bin:\$PATH
-                                eval `jenv init -`
-                                jenv enable-plugin export
-                                jenv versions && jenv doctor
+                                launchctl setenv TESTJAVA ${env.javaVersionNumber}
+                                env | grep TEST
                             """
+
+                            sh("env | grep TEST")
                             //sh("java -version")
                             //sh("jenv global ${dockerAgent.javaVersion}")
                             //sh("java -version")
