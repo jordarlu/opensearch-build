@@ -59,8 +59,10 @@ pipeline {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
                             sh """
                                 jenv versions
+                                java -version
                                 echo "openjdk-17" > ~/.jenv/version
                                 jenv versions
+                                java -version
                             """
 
                             //sh("java -version")
