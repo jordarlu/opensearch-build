@@ -56,27 +56,12 @@ pipeline {
                     }
                     steps {
                         script {
+                            echo("Current Java version")
+                            sh("java -version")
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
-                            sh """
-                                echo "openjdk-11" > ~/.jenv/version
-                                jenv versions
-                                java -version
-                            """
-                            sh """
-                                echo "openjdk-17" > ~/.jenv/version
-                                jenv versions
-                                java -version
-                            """
-
-                            //sh("java -version")
-                            //sh("jenv global ${dockerAgent.javaVersion}")
-                            //sh("java -version")
-                            //sh("env")
-                            //sh("jenv versions")
-                            //sh("java -version")
-                            //sh("jenv doctor")
-                            //sh("echo $JAVA_HOME")
-                            //sh("echo $JENV_VERSION")
+                            sh("update-alternatives --set java `update-alternatives --list java | grep openjdk-${env.javaVersionNumber}`")
+                            sh("java -version")
+                            sh("echo $JAVA_HOME")
                         }
                     }
                     post {
