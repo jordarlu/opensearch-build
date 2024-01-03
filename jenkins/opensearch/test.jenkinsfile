@@ -61,7 +61,6 @@ pipeline {
                             echo("Switching to Java ${env.javaVersionNumber} on MacOS")
                             sh("update-alternatives --set java `update-alternatives --list java | grep openjdk-${env.javaVersionNumber}`")
                             sh("java -version")
-                            sh("echo $JAVA_HOME")
                         }
                     }
                     post {
