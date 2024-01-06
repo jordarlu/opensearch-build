@@ -132,6 +132,7 @@ pipeline {
                             localPath: "${WORKSPACE}/artifacts",
                             force: true
                           )
+                        sh("cd $WORKSPACE/")
                         sh("ls $WORKSPACE/$distribution && ls $WORKSPACE/artifacts/${artifactPath}")
                     }
                     else {
