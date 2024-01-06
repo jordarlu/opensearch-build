@@ -124,14 +124,14 @@ pipeline {
                     if (env.platform != 'windows') {
                         echo "Not on Windows, stash repository+artifacts"
                         echo "Downloading from S3: ${artifactPath}"
-                        downloadFromS3(
-                            assumedRoleName: 'opensearch-bundle',
-                            roleAccountNumberCred: 'jenkins-aws-account-public',
-                            downloadPath: "${artifactPath}/",
-                            bucketName: "${ARTIFACT_BUCKET_NAME}",
-                            localPath: "${WORKSPACE}/artifacts",
-                            force: true
-                          )
+                            downloadFromS3(
+                                assumedRoleName: "opensearch-bundle",
+                                roleAccountNumberCred: "jenkins-aws-account-public",
+                                downloadPath: "zelin-playground/distribution-build-opensearch-incremental/2.12.0/4/linux/x64/tar/",
+                                bucketName: "${ARTIFACT_BUCKET_NAME}",
+                                localPath: "${WORKSPACE}",
+                                force: true,
+                            )
                         sh("pwd")
                     }
                     else {
