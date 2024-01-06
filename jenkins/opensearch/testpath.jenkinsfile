@@ -132,8 +132,7 @@ pipeline {
                             localPath: "${WORKSPACE}/artifacts",
                             force: true
                           )
-                        sh("cd $WORKSPACE/")
-                        sh("ls $WORKSPACE/$distribution && ls $WORKSPACE/artifacts/${artifactPath}")
+                        sh("pwd")
                     }
                     else {
                         echo "On Windows Platform, stash repository only"
