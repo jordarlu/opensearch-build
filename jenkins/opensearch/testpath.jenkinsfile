@@ -151,27 +151,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            node(AGENT_LABEL) {
-                script {
-                        echo "do nothing"
-                    )
-
-                    postCleanup()
-                }
-            }
-        }
-        failure {
-            node(AGENT_LABEL) {
-                script  {
-                        echo "do nothing"
-                    )
-
-                    postCleanup()
-                }
-            }
-        }
-    }
 }
