@@ -1,0 +1,177 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ */
+
+lib = library(identifier: 'jenkins@5.11.1', retriever: modernSCM([
+
+    $class: 'GitSCMSource',
+    remote: 'https://github.com/opensearch-project/opensearch-build-libraries.git',
+]))
+
+def docker_images = [
+    "tar": "opensearchstaging/ci-runner:ci-runner-centos7-opensearch-build-v3",
+    "rpm": "opensearchstaging/ci-runner:ci-runner-rockylinux8-systemd-base-integtest-v3",
+    "deb": "opensearchstaging/ci-runner:ci-runner-ubuntu2004-systemd-base-integtest-v3",
+    "zip": "opensearchstaging/ci-runner:ci-runner-windows2019-servercore-opensearch-build-v1",
+]
+
+def docker_args = [
+    "tar": "-u 1000",
+    "rpm": "--entrypoint=/usr/lib/systemd/systemd -u root --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host",
+    "deb": "--entrypoint=/usr/lib/systemd/systemd -u root --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host",
+    "zip": "-u ContainerAdministrator",
+]
+
+def agent_nodes = [
+    "linux_x64": "Jenkins-Agent-AL2023-X64-C54xlarge-Docker-Host",
+    "linux_arm64": "Jenkins-Agent-AL2023-Arm64-C6g4xlarge-Docker-Host",
+    "windows_x64": "Jenkins-Agent-Windows2019-X64-C54xlarge-Docker-Host",
+]
+
+pipeline {
+    options {
+        timeout(time: 4, unit: 'HOURS')
+        buildDiscarder(logRotator(daysToKeepStr: '30'))
+    }
+    agent none
+    environment {
+        BUILD_MANIFEST = "build-manifest.yml"
+        BUILD_JOB_NAME = "distribution-build-opensearch"
+        ARTIFACT_BUCKET_NAME = credentials('jenkins-artifact-bucket-name')
+    }
+    parameters {
+        string(
+            name: 'COMPONENT_NAME',
+            description: 'If this field contains one or more component names (e.g. index-management geospatial ...) separated by space, will test with "--component ...", else test everything in the TEST_MANIFEST..',
+            trim: true
+        )
+        string(
+            name: 'TEST_MANIFEST',
+            description: 'Test manifest under the manifests folder, e.g. 2.0.0/opensearch-2.0.0-test.yml.',
+            trim: true
+        )
+        string(
+            name: 'BUILD_MANIFEST_URL',
+            description: 'The build manifest URL for OpenSearch, e.g. "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/2.9.0/8172/linux/x64/tar/builds/opensearch/manifest.yml".',
+            trim: true
+        )
+    }
+    stages {
+        stage('verify-parameters') {
+            agent { label agent_nodes["linux_x64"]}
+            steps {
+                script {
+                    if (TEST_MANIFEST == '' || !fileExists("manifests/${TEST_MANIFEST}")) {
+                        currentBuild.result = 'ABORTED'
+                        error("Integration Tests failed to start. Test manifest was not provided or not found in manifests/${TEST_MANIFEST}.")
+                    }
+
+                    if (BUILD_MANIFEST_URL == '') {
+                        currentBuild.result = 'ABORTED'
+                        error("Integration Tests failed to start. Build manifest url was not provided.")
+                    }
+
+                    downloadBuildManifest(
+                        url: BUILD_MANIFEST_URL,
+                        path: BUILD_MANIFEST
+                    )
+
+                    def buildManifestObj = lib.jenkins.BuildManifest.new(readYaml(file: BUILD_MANIFEST))
+                    def componentList = COMPONENT_NAME ? COMPONENT_NAME.trim().split(" ") as List : buildManifestObj.getNames()
+                    env.architecture = buildManifestObj.getArtifactArchitecture()
+                    env.platform = buildManifestObj.getArtifactPlatform()
+                    env.buildId = buildManifestObj.getArtifactBuildId()
+                    env.distribution = buildManifestObj.getDistribution()
+                    env.version = buildManifestObj.build.version
+                    env.platform = buildManifestObj.build.platform
+                    env.artifactPath = buildManifestObj.getArtifactRoot(BUILD_JOB_NAME, buildId)
+                    env.AGENT_LABEL = agent_nodes["${env.platform}_${architecture}"]
+
+                    echo "Version: ${version}, Agent: ${AGENT_LABEL}, BuildId: ${buildId}, Distribution: ${distribution}, Components: ${componentList}"
+                    currentBuild.description = "$TEST_MANIFEST, $version, $architecture, $platform, $buildId, $distribution, $componentList"
+                }
+            }
+            post {
+                always {
+                    postCleanup()
+                }
+            }
+        }
+        stage('integ-test') {
+            // Need to run this directly on agent node here in order to trigger stages with docker container and avoid docker within docker situation
+            // Can only be run in runner that is at least 50GB per container
+            agent { label AGENT_LABEL }
+            steps {
+                script {
+
+                    downloadBuildManifest(
+                        url: BUILD_MANIFEST_URL,
+                        path: BUILD_MANIFEST
+                    )
+
+                    def buildManifestObj = lib.jenkins.BuildManifest.new(readYaml(file: BUILD_MANIFEST))
+                    def componentDefaultList = buildManifestObj.getNames()
+                    def componentList = COMPONENT_NAME ? COMPONENT_NAME.trim().split(" ") as List : componentDefaultList
+                    String switch_user_non_root = (distribution.equals('rpm') || distribution.equals('deb')) ? 'true' : 'false'
+                    echo "switch_user_non_root: ${switch_user_non_root}"
+                    echo "componentList: ${componentList}"
+
+                    if (env.platform != 'windows') {
+                        echo "Not on Windows, stash repository+artifacts"
+                        echo "Downloading from S3: ${artifactPath}"
+                        downloadFromS3(
+                            assumedRoleName: 'opensearch-bundle',
+                            roleAccountNumberCred: 'jenkins-aws-account-public',
+                            downloadPath: "${artifactPath}/",
+                            bucketName: "${ARTIFACT_BUCKET_NAME}",
+                            localPath: "${WORKSPACE}/artifacts",
+                            force: true
+                          )
+                        sh("ls $WORKSPACE/$distribution && ls $WORKSPACE/artifacts/${artifactPath}")
+                    }
+                    else {
+                        echo "On Windows Platform, stash repository only"
+                    }
+                }
+            }
+            post {
+                always {
+                    script {
+                        node(AGENT_LABEL) {
+                          echo "do nothing"
+                        }
+                    }
+                    postCleanup()
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            node(AGENT_LABEL) {
+                script {
+                        echo "do nothing"
+                    )
+
+                    postCleanup()
+                }
+            }
+        }
+        failure {
+            node(AGENT_LABEL) {
+                script  {
+                        echo "do nothing"
+                    )
+
+                    postCleanup()
+                }
+            }
+        }
+    }
+}
