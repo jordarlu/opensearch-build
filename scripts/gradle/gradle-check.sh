@@ -12,7 +12,7 @@
 # To trigger Jenkins Gradle Check from a PR
 
 
-JENKINS_URL="https://build.ci.opensearch.org"
+JENKINS_URL="https://ci-beta.opensearch.org"
 TIMEPASS=0
 TIMEOUT=7200
 RESULT="null"
